@@ -1,0 +1,13 @@
+/models/
+/.venv/
+/logs/
+/llm_config.py
+/.llm_config_*
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.DS_Store
+*.dylib
+*.gguf
+*.onnx

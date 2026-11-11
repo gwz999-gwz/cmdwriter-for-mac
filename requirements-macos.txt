@@ -1,0 +1,48 @@
+# CapsWriter-Offline macOS 依赖清单
+# 适用平台：macOS (Apple Silicon / Intel)
+# 安装：uv venv --python 3.12 .venv && uv pip install -r requirements-macos.txt --python .venv/bin/python
+
+# ── 基础 ──
+numpy
+rich
+# ── 本地音频与模型运行时 ──
+onnxruntime
+sentencepiece
+soundfile
+
+# ── Qwen3-ASR（GGUF 解码需 llama.cpp 原生库，
+#    见 setup_macos_llama.sh 与 readme 说明）──
+gguf
+
+# ── 客户端音频 ──
+sounddevice
+
+# ── 输入 / 文本输出 ──
+pynput
+pyclip
+
+# ── 热词 ──
+pypinyin
+watchdog
+rapidfuzz
+
+# ── 文件转录 ──
+srt
+
+# ── 菜单栏与 UI ──
+pystray
+Pillow
+markdown
+tkhtmlview
+
+# ── LLM（可选，未配置 API 时不影响纯语音输入）──
+httpx
+openai
+typer
+colorama
+
+# ── macOS 专用：键盘监听与系统界面 ──
+pyobjc-framework-Quartz
+
+# ── 可选加速（热词 RAG 的 Numba 加速，缺失时自动降级为纯 Python）──
+# numba
