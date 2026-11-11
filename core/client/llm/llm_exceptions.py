@@ -29,27 +29,27 @@ class OpenAIErrorWrapper(LLMException):
 
 class AuthenticationErrorWrapper(OpenAIErrorWrapper):
     """认证失败异常 (401)"""
-    user_message = "API 认证失败，请检查 API Key 配置"
+    user_message = "API 认证失败，请检查密钥。 / API authentication failed. Check the API key."
 
 
 class RateLimitErrorWrapper(OpenAIErrorWrapper):
     """速率限制异常 (429)"""
-    user_message = "API 速率限制，请稍后重试"
+    user_message = "API 请求过于频繁，请稍后重试。 / API rate limit reached. Try again later."
 
 
 class TimeoutErrorWrapper(OpenAIErrorWrapper):
     """请求超时异常"""
-    user_message = "API 请求超时，请检查网络连接"
+    user_message = "API 请求超时，请检查网络。 / API request timed out. Check the network connection."
 
 
 class ConnectionErrorWrapper(OpenAIErrorWrapper):
     """连接失败异常"""
-    user_message = "API 连接失败，请检查网络和 API 地址"
+    user_message = "API 连接失败，请检查网络和 API 地址。 / Could not connect to the API. Check your connection and API URL."
 
 
 class APIResponseErrorWrapper(OpenAIErrorWrapper):
     """API 响应错误异常 (4xx, 5xx)"""
-    user_message = "API 响应错误，请检查配置和参数"
+    user_message = "API 响应错误，请检查配置和参数。 / API response error. Check the settings and request parameters."
 
 
 # OpenAI 异常映射表

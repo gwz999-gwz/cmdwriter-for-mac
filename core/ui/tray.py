@@ -22,7 +22,7 @@ def _create_icon(icon_path: Optional[str] = None):
         try:
             return Image.open(icon_path).convert('RGBA').resize((64, 64), Image.Resampling.LANCZOS)
         except Exception as exc:
-            logger.warning(f"菜单栏图标加载失败，将使用默认图标: {exc}")
+            logger.warning(f"图标加载失败，将使用默认图标 / Could not load the menu bar icon. Using the default: {exc}")
 
     image = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
@@ -68,7 +68,7 @@ class _MenuBarSystem:
             else:
                 menu_item = item(label, callback)
             items.append(menu_item)
-        items.extend((item('🔄 重启', self._restart), item('❌ 退出', self._exit)))
+        items.extend((item('🔄 重启 / Restart', self._restart), item('❌ 退出 / Quit', self._exit)))
         return pystray.Menu(*items)
 
     def _create_submenu(self, options):
@@ -123,7 +123,7 @@ class _MenuBarSystem:
         try:
             subprocess.Popen([sys.executable, *sys.argv])
         except Exception as exc:
-            logger.error(f"重启失败: {exc}")
+            logger.error(f"重启失败 / Restart failed: {exc}")
             return
         self._exit(icon, item)
 
@@ -145,7 +145,7 @@ def enable_min_to_tray(name=None, icon_path=None, exit_callback=None, more_optio
             _tray_instance.start()
         except Exception as exc:
             _tray_instance = None
-            logger.error(f"macOS 菜单栏图标启动失败: {exc}", exc_info=True)
+            logger.error(f"菜单栏图标启动失败 / Could not start menu bar icon: {exc}", exc_info=True)
 
 
 def update_tray_info(text: str) -> None:

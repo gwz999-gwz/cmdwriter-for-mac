@@ -31,15 +31,15 @@ class SrtAdjuster:
             file: 文本文件路径
         """
         task_id = str(uuid.uuid1())
-        console.print(f'\n任务标识：{task_id}')
-        console.print(f'    处理文件：{file}')
+        console.print(f'\n任务标识 / Task ID: {task_id}')
+        console.print(f'    处理文件 / File: {file}')
         
         logger.info(f"开始调整 SRT: {file}")
         
         try:
             srt_from_txt.one_task(file)
-            console.print('    [green]srt 调整完成')
+            console.print('    [green]SRT 调整完成 / SRT adjustment complete')
             logger.info(f"SRT 调整完成: {file}")
         except Exception as e:
-            console.print(f'    [red]srt 调整失败: {e}')
-            logger.error(f"SRT 调整失败: {e}", exc_info=True)
+            console.print(f'    [red]SRT 调整失败 / SRT adjustment failed: {e}')
+            logger.error(f"SRT 调整失败 / SRT adjustment failed: {e}", exc_info=True)

@@ -101,4 +101,4 @@ class MessageBuilder:
             logger.info("\n".join(info_msg))
 
         except Exception as e:
-            logger.error(f"消息日志输出失败: {e}")
+            logger.error(f"消息日志输出失败 / Could not log messages: {e}")

@@ -22,26 +22,26 @@ class TrayManager:
 
     def _build_menu_options(self):
         """构建 more_options 列表（设备信息 + 功能菜单项）"""
-        device_info = self.app.stream.device_info if hasattr(self.app, 'stream') and self.app.stream else '🎤 未知设备'
+        device_info = self.app.stream.device_info if hasattr(self.app, 'stream') and self.app.stream else '🎤 未知设备 / Unknown device'
         return [
             (device_info, None),  # callback=None 表示禁用项，纯展示
-            ('🎤 选择麦克风', self._build_microphone_options()),
-            ('📋 复制结果', self._copy_last_result),
-            ('✨ 添加热词…', self._add_hotword),
-            ('🔥 启用热词', self._toggle_hotwords, bool(Config.hot)),
-            ('🤖 修改 AI 润色设置', self._edit_llm_config),
-            ('🗣️ 说话方式', self._build_recording_mode_options()),
-            ('🎙️ 仅按下时启用麦克风', self._toggle_mic_only_on_press, bool(Config.mic_only_on_press)),
-            ('♻️ 重开音频', self._restart_audio),
+            ('🎤 选择麦克风 / Choose microphone', self._build_microphone_options()),
+            ('📋 复制结果 / Copy result', self._copy_last_result),
+            ('✨ 添加热词… / Add hotwords…', self._add_hotword),
+            ('🔥 启用热词 / Enable hotwords', self._toggle_hotwords, bool(Config.hot)),
+            ('🤖 修改 AI 润色设置 / AI polishing settings', self._edit_llm_config),
+            ('🗣️ 说话方式 / Recording mode', self._build_recording_mode_options()),
+            ('🎙️ 仅按下时启用麦克风 / Microphone only while pressed', self._toggle_mic_only_on_press, bool(Config.mic_only_on_press)),
+            ('♻️ 重开音频 / Reopen audio', self._restart_audio),
         ]
 
     def _build_recording_mode_options(self):
         mode = getattr(Config, 'recording_mode', 'hold')
         return [
-            ('按住说话（按住 Command，松开结束）',
+            ('按住说话 / Hold to speak',
              lambda icon=None, item=None: self._set_recording_mode('hold'),
              mode == 'hold', True),
-            ('按一下说话（按 Command 开始，再按一下结束）',
+            ('按一下说话 / Press to start or stop',
              lambda icon=None, item=None: self._set_recording_mode('toggle'),
              mode == 'toggle', True),
         ]
@@ -52,7 +52,7 @@ class TrayManager:
         try:
             self._update_config_attr('recording_mode', mode)
         except Exception as exc:
-            logger.error(f"切换说话方式失败: {exc}")
+            logger.error(f"切换说话方式失败 / Could not change recording mode: {exc}")
             return
         self._restart_app()
 
@@ -60,10 +60,10 @@ class TrayManager:
         """构建麦克风单选子菜单。"""
         stream = getattr(self.app, 'stream', None)
         if stream is None:
-            return [('未检测到麦克风', None)]
+            return [('未检测到麦克风 / No microphone detected', None)]
 
         options = [(
-            '跟随系统默认',
+            '跟随系统默认 / Follow system default',
             self._device_callback(None, None),
             lambda _, stream=stream: stream.follows_system_default,
             True,
@@ -85,7 +85,7 @@ class TrayManager:
                 ),
                 True,
             ))
-        options.append(('刷新设备列表', self._refresh_audio_devices))
+        options.append(('刷新设备列表 / Refresh devices', self._refresh_audio_devices))
         return options
 
     def _device_callback(self, device_id, device_name):
@@ -106,7 +106,7 @@ class TrayManager:
             self._update_config_attr('mic_device', device_name)
             Config.mic_device = device_name
         except Exception as exc:
-            logger.warning(f"保存麦克风选择失败（本次切换仍然有效）: {exc}")
+            logger.warning(f"本次麦克风已切换，设置保存失败 / Microphone switched, but the preference could not be saved: {exc}")
         self._refresh_audio_devices()
 
     def _refresh_audio_devices(self, icon=None, item=None):
@@ -114,7 +114,7 @@ class TrayManager:
             from ..ui import update_tray_options
             update_tray_options(self._build_menu_options())
         except Exception as exc:
-            logger.warning(f"刷新麦克风菜单失败: {exc}")
+            logger.warning(f"刷新麦克风菜单失败 / Could not refresh microphone menu: {exc}")
 
     def _on_device_changed(self, device_info: str) -> None:
         """音频设备变更时更新托盘菜单中的设备信息"""
@@ -129,7 +129,7 @@ class TrayManager:
         try:
             from ..ui import enable_min_to_tray
         except ImportError as e:
-            logger.warning(f"托盘模块导入失败，跳过托盘功能: {e}")
+            logger.warning(f"托盘模块导入失败 / Menu bar module could not be loaded: {e}")
             return
 
         # 获取图标路径
@@ -178,7 +178,7 @@ class TrayManager:
         try:
             self._update_config_attr('mic_only_on_press', new_value)
         except Exception as e:
-            logger.error(f"切换 mic_only_on_press 失败: {e}")
+            logger.error(f"切换麦克风模式失败 / Could not change microphone mode: {e}")
             return
         # 启动新进程并退出当前进程
         self._restart_app()
@@ -189,7 +189,7 @@ class TrayManager:
         try:
             self._update_config_attr('hot', new_value)
         except Exception as e:
-            logger.error(f"切换热词功能失败: {e}")
+            logger.error(f"切换热词功能失败 / Could not change hotword setting: {e}")
             return
         self._restart_app()
 
@@ -217,7 +217,7 @@ class TrayManager:
             content,
         )
         if count == 0:
-            raise RuntimeError(f"未在 config.py 中找到属性 {attr_name}")
+            raise RuntimeError(f"config.py 中缺少设置 / Missing setting in config.py: {attr_name}")
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write(new_content)
         logger.info(f"已改写 config.py: {attr_name} = {value_literal}")
@@ -246,7 +246,7 @@ class TrayManager:
         on_add_hotword(self.app.base_dir)
 
     def _edit_llm_config(self, icon=None, item=None):
-        """在独立 GUI 进程中修改 AI 润色设置，避免阻塞菜单栏。"""
+        """在独立 GUI 进程中修改 AI 润色设置 / AI polishing settings，避免阻塞菜单栏。"""
         threading.Thread(
             target=self._run_llm_config_dialog,
             name='llm-config-dialog',
@@ -263,7 +263,7 @@ class TrayManager:
                 check=False,
             )
             if result.returncode != 0:
-                logger.error('AI 润色设置窗口异常退出，返回码: %s', result.returncode)
+                logger.error('AI 润色设置窗口异常退出 / AI polishing settings closed with exit code: %s', result.returncode)
                 return
 
             # 窗口可能是“取消”关闭；重新读取没有副作用，也能确保后续请求使用最新配置。
@@ -272,7 +272,7 @@ class TrayManager:
             if self.app.llm.config is not None:
                 logger.info('AI 润色设置已重新加载: %s', self.app.llm.config.model)
         except Exception as exc:
-            logger.error('打开或重新加载 AI 润色设置失败: %s', exc, exc_info=True)
+            logger.error('打开或重载 AI 润色设置失败 / Could not open or reload AI polishing settings: %s', exc, exc_info=True)
 
     def _copy_last_result(self):
         """复制最后一次识别结果到剪贴板回调"""

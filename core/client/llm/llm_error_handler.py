@@ -25,7 +25,7 @@ def get_user_friendly_message(error: Exception) -> str:
         return error.user_message
 
     # 其他异常
-    return f"处理失败: {type(error).__name__}"
+    return f"处理失败 / Polishing failed: {type(error).__name__}"
 
 
 def should_fallback_to_original(error: Exception) -> bool:
@@ -53,8 +53,8 @@ def show_error_notification(error: Exception):
     user_msg = get_user_friendly_message(error)
 
     # 记录日志
-    logger.warning(f"[LLM 润色] {user_msg} - {error}")
-    logger.error(f"LLM 润色: {user_msg}")
+    logger.warning(f"[LLM 润色 / AI polishing] {user_msg} - {error}")
+    logger.error(f"LLM 润色 / AI polishing: {user_msg}")
 
 
 def handle_llm_error(error: Exception, original_text: str,
@@ -73,5 +73,5 @@ def handle_llm_error(error: Exception, original_text: str,
     # 错误需要被记录，但无论错误类型如何都降级到识别文本。
     show_error_notification(error)
     result = fallback_text if fallback_text is not None else original_text
-    logger.info(f"[LLM 润色] 处理失败，降级到原文本: {error}")
+    logger.info(f"[LLM 润色 / AI polishing] 处理失败，降级到原文本: {error}")
     return (result, False)

@@ -46,7 +46,7 @@ class HotwordDialog:
     def show(
         self,
         default_text: str = "",
-        title: str = "添加热词",
+        title: str = "添加热词 / Add hotwords",
         width: int = 460
     ) -> DialogResult:
         """
@@ -82,7 +82,7 @@ class HotwordDialog:
         # 说明
         ttk.Label(
             main_frame,
-            text="输入一个热词（也可以每行输入一个）：",
+            text="每行输入一个热词。\nEnter one hotword per line.",
             font=(DEFAULT_FONT_FAMILY, 9),
             foreground="#666666"
         ).pack(anchor="w", pady=(0, 10))
@@ -110,7 +110,7 @@ class HotwordDialog:
 
             # 验证输入
             if not value:
-                messagebox.showwarning("输入为空", "热词不能为空！")
+                messagebox.showwarning("输入为空 / Empty input", "请输入至少一个热词。\nEnter at least one hotword.")
                 return
 
             # 保存结果并关闭对话框
@@ -136,7 +136,7 @@ class HotwordDialog:
         # 确定按钮
         confirm_btn = tk.Button(
             button_frame,
-            text="添加到热词",
+            text="添加到热词 / Add hotwords",
             command=on_confirm,
             font=(DEFAULT_FONT_FAMILY, 9),
             bg="#4CAF50",
@@ -152,7 +152,7 @@ class HotwordDialog:
         # 取消按钮
         cancel_btn = tk.Button(
             button_frame,
-            text="取消 (Esc)",
+            text="取消 / Cancel (Esc)",
             command=on_cancel,
             font=(DEFAULT_FONT_FAMILY, 9),
             bg="#f44336",
@@ -190,7 +190,7 @@ def _center_window(window: tk.Toplevel, width: int, height: int) -> None:
 def show_hotword_dialog(
     default_text: str = "",
     parent: tk.Tk = None,
-    title: str = "添加热词",
+    title: str = "添加热词 / Add hotwords",
     width: int = 400
 ) -> DialogResult:
     """显示热词添加对话框（便捷函数）"""

@@ -95,7 +95,7 @@ class HotwordManager:
         padding1 = " " * max(0, 8 - w)
         w2 = self._get_display_width(filename)
         padding2 = " " * max(0, 16 - w2)
-        return f"[bold cyan]{label}{padding1}：[/][cyan]{filename}{padding2}[/] 已更新[green]{count:3d}[/]条"
+        return f"[bold cyan]{label}{padding1}：[/][cyan]{filename}{padding2}[/] 更新条数 / Entries loaded: [green]{count:3d}[/]"
 
     def load_all(self) -> None:
         """初次加载所有资源"""
@@ -116,18 +116,18 @@ class HotwordManager:
                 return ""
             return path.read_text(encoding='utf-8')
         except Exception as e:
-            logger.error(f"读取文件失败 {path}: {e}")
+            logger.error(f"读取文件失败 / Could not read {path}: {e}")
             return ""
 
     def _load_hot(self) -> None:
         content = self._read_file('hot')
         num = self.phoneme_corrector.update_hotwords(content)
-        console.print(self._format_msg("热词库", "hot.txt", num))
+        console.print(self._format_msg("热词库 / Hotwords", "hot.txt", num))
 
     def _load_rule(self) -> None:
         content = self._read_file('rule')
         num = self.rule_corrector.update_rules(content)
-        console.print(self._format_msg("规则库", "hot-rule.txt", num))
+        console.print(self._format_msg("规则库 / Rules", "hot-rule.txt", num))
 
     def get_phoneme_corrector(self) -> PhonemeCorrector:
         return self.phoneme_corrector
@@ -236,8 +236,8 @@ class _HotwordFileHandler(FileSystemEventHandler):
                     handler()
                     logger.info(f"热词文件已自动重新加载: {filename}")
                 except Exception as e:
-                    console.print(f'热词自动更新失败：{e}', style='bright_red')
-                    logger.error(f"更新热词失败: {e}", exc_info=True)
+                    console.print(f'热词自动更新失败 / Could not reload hotwords: {e}', style='bright_red')
+                    logger.error(f"更新热词失败 / Could not update hotwords: {e}", exc_info=True)
             break
 
 

@@ -171,7 +171,7 @@ def get_phoneme_seq(text: str, ascii_split_char: bool = False) -> List[Phoneme]:
     """
     normalized = normalize_text(text)
     if not pinyin:
-        logger.warning("pypinyin 未安装，功能将降级。")
+        logger.warning("未安装 pypinyin，热词功能受限。 / pypinyin is missing. Hotword matching is limited.")
         return [Phoneme(c, 'zh', is_word_start=True, is_word_end=True) for c in split_mixed_label(normalized)]
 
     phoneme_seq: List[Phoneme] = []

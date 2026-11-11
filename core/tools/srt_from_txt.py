@@ -139,7 +139,7 @@ def one_task(media_file: Path):
     json_file = media_file.with_suffix('.json')
     srt_file = media_file.with_suffix('.srt')
     if (not txt_file.exists()) or (not json_file.exists()):
-        print(f'无法找到 {media_file}对应的txt、json文件，跳过')
+        print(f'跳过缺少 TXT 或 JSON 的文件 / Skipping {media_file}: TXT or JSON file missing')
         return None
 
     # 获取带有时间戳的分词列表，获取分行稿件，匹配得到 srt 
@@ -151,7 +151,7 @@ def one_task(media_file: Path):
 def main(files: List[Path]):
     for file in files:
         one_task(file)
-        print(f'写入完成：{file}')
+        print(f'写入完成 / Written: {file}')
 
 if __name__ == '__main__':
     typer.run(main)

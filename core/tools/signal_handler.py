@@ -13,9 +13,9 @@ class SignalHandler:
         now = time.time()
         if now - self.last_time > 1.0:
             self.last_time = now
-            print(f"\n收到 {signal.Signals(signum).name}，1秒内再次按下将会退出...")
+            print(f"\n已收到 {signal.Signals(signum).name}，1 秒内再次按下可退出。 / Press again within 1 second to exit.")
         else:
-            print(f"\n收到 {signal.Signals(signum).name}，确认退出...\n")
+            print(f"\n已收到 {signal.Signals(signum).name}，确认退出。 / Exiting.\n")
             self.last_time = 0
             self.callback()
             

@@ -53,7 +53,7 @@ class AudioStreamManager:
         """
         self.app = app
         self._channels = 1
-        self._device_name = '未知设备'
+        self._device_name = '未知设备 / Unknown device'
         self._device_id: Optional[int] = None
         self._preferred_device_name: Optional[str] = getattr(Config, 'mic_device', None)
         self._running = False        # 流对象是否已创建
@@ -66,7 +66,7 @@ class AudioStreamManager:
     @property
     def device_info(self) -> str:
         """返回当前音频设备信息（设备名 + 声道数）"""
-        return f"🎤 {self._device_name}，声道数：{self._channels}"
+        return f"🎤 {self._device_name}，声道数 / Channels: {self._channels}"
 
     @property
     def selected_device_id(self) -> Optional[int]:
@@ -84,7 +84,7 @@ class AudioStreamManager:
             devices = sd.query_devices()
             host_apis = sd.query_hostapis()
         except Exception as exc:
-            logger.warning(f"枚举麦克风失败: {exc}")
+            logger.warning(f"枚举麦克风失败 / Could not list microphones: {exc}")
             return []
 
         result = []
@@ -201,17 +201,17 @@ class AudioStreamManager:
             device_id, device = self._resolve_device()
             self._device_id = device_id
             self._channels = min(2, device['max_input_channels'])
-            self._device_name = device.get('name', '未知设备')
+            self._device_name = device.get('name', '未知设备 / Unknown device')
             console.print(
-                f'使用音频设备：[italic]{self._device_name}，声道数：{self._channels}',
+                f'使用音频设备 / Input device: [italic]{self._device_name}，声道数 / Channels: {self._channels}',
                 end='\n\n'
             )
             logger.info(f"找到音频设备: {self._device_name}, 声道数: {self._channels}")
             self._notify_device_changed()
         except UnicodeDecodeError:
-            logger.warning("无法获取音频设备名称（编码问题）")
+            logger.warning("无法读取音频设备名称 / Could not decode the audio device name")
         except sd.PortAudioError:
-            logger.error("未找到麦克风设备")
+            logger.error("未找到麦克风设备 / No microphone found")
             self._stream_ready.set()
             return None
 
@@ -238,7 +238,7 @@ class AudioStreamManager:
             return stream
 
         except Exception as e:
-            logger.error(f"创建音频流对象失败: {e}", exc_info=True)
+            logger.error(f"创建音频流失败 / Could not open the audio stream: {e}", exc_info=True)
             self._stream_ready.set()
             return None
 
@@ -249,14 +249,14 @@ class AudioStreamManager:
 
     def _start_streaming_locked(self) -> bool:
         if not self._running:
-            logger.warning("音频流对象未创建，无法启动传输")
+            logger.warning("音频流未创建 / The audio stream has not been created")
             return False
         if self._streaming:
             logger.debug("音频流已在传输中，跳过 start_streaming")
             return True
         stream = self.state.stream
         if stream is None:
-            logger.warning("state.stream 为空，无法启动传输")
+            logger.warning("音频流为空，无法启动 / No audio stream to start")
             return False
         try:
             stream.start()
@@ -264,7 +264,7 @@ class AudioStreamManager:
             logger.debug("音频流传输已启动")
             return True
         except Exception as e:
-            logger.error(f"启动音频流传输失败: {e}", exc_info=True)
+            logger.error(f"启动音频流失败 / Could not start the audio stream: {e}", exc_info=True)
             return False
 
     def stop_streaming(self) -> None:
@@ -290,7 +290,7 @@ class AudioStreamManager:
             stream.stop()
             logger.debug("音频流传输已停止（流对象保留）")
         except Exception as e:
-            logger.warning(f"停止音频流传输时发生错误: {e}")
+            logger.warning(f"停止音频流失败 / Could not stop the audio stream: {e}")
 
     def reopen_and_start(self) -> Optional[sd.InputStream]:
         """关闭旧流 + 创建新流 + 启动传输。
@@ -314,7 +314,7 @@ class AudioStreamManager:
                 self.state.stream.close()
                 logger.debug("旧音频流已关闭")
             except Exception as e:
-                logger.warning(f"关闭旧音频流时发生错误: {e}")
+                logger.warning(f"关闭旧音频流失败 / Could not close the previous audio stream: {e}")
             finally:
                 self.state.stream = None
 
@@ -334,7 +334,7 @@ class AudioStreamManager:
         """
         with self._stream_lock:
             if self.state.recording:
-                logger.warning("录音过程中不能切换麦克风，请结束本次录音后重试")
+                logger.warning("请结束录音后再切换麦克风。 / Stop recording before switching microphones.")
                 return False
 
             if device_name is not None:
@@ -344,7 +344,7 @@ class AudioStreamManager:
                     None,
                 )
                 if current is None:
-                    logger.warning(f"所选麦克风“{device_name}”已不可用，请刷新设备列表")
+                    logger.warning(f"所选麦克风已不可用，请刷新设备列表。 / The selected microphone is unavailable. Refresh devices: {device_name}")
                     return False
 
             old_preference = self._preferred_device_name
@@ -359,7 +359,7 @@ class AudioStreamManager:
                 )
                 return True
 
-            logger.error("切换麦克风失败，正在恢复之前的设备")
+            logger.error("切换麦克风失败，正在恢复之前的设备 / Could not switch microphones. Restoring the previous device.")
             self._preferred_device_name = old_preference
             self._reopen_locked(start_after=start_after)
             return False
@@ -400,7 +400,7 @@ class AudioStreamManager:
                 self.state.stream.close()
                 logger.debug("音频流已停止")
             except Exception as e:
-                logger.warning(f"停止音频流时发生错误: {e}")
+                logger.warning(f"停止音频流失败 / Could not stop the audio stream: {e}")
             finally:
                 self.state.stream = None
         self._stream_ready.set()

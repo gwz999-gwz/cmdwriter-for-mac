@@ -67,7 +67,7 @@ class TaskPipeline:
             
             logger.debug(f"简单拼接: +{added_chars} 字符, 片段={len(segment_text)}, 总={len(result.text)}")
         except Exception as e:
-            logger.warning(f"简单文本拼接失败: {e}")
+            logger.warning(f"文本拼接失败 / Could not merge text: {e}")
 
     def _needs_forced_alignment(self, task: Task) -> bool:
         """是否需要额外的强制对齐器生成精确时间戳。"""
@@ -142,8 +142,8 @@ class TaskPipeline:
             result.time_start, result.time_submit = task.time_start, task.time_submit
             # 4. 路径 A: 简单文本拼接 (主要用于实时回显)
             asr_raw_text = stream.result.text
-            logger.info(f'模型输出：{asr_raw_text}')
-            console.print(f'\033[0G  模型输出：[cyan]{asr_raw_text}', soft_wrap=True)
+            logger.info(f'模型输出 / Model output: {asr_raw_text}')
+            console.print(f'\033[0G  模型输出 / Model output: [cyan]{asr_raw_text}', soft_wrap=True)
             self._process_simple_merge(result, asr_raw_text)
 
             # 5. 路径 B: 对齐增强 (仅针对文件任务，且需要 srt 时才调用)
@@ -199,8 +199,8 @@ class TaskPipeline:
             raw_text = result.text
             result.text = self.formatter.format(result.text)
             result.text_accu = self.formatter.format(result.text_accu)
-            console.print(f'  片段拼接：[purple]{raw_text}', soft_wrap=True)
-            console.print(f'  格式化后：[green]{result.text}\n', soft_wrap=True)
+            console.print(f'  片段拼接 / Merged segments: [purple]{raw_text}', soft_wrap=True)
+            console.print(f'  格式化后 / Formatted text: [green]{result.text}\n', soft_wrap=True)
 
             logger.debug(f'格式调整：{raw_text} --> {result.text}')
 
@@ -229,5 +229,5 @@ class TaskPipeline:
             return result
 
         except Exception as e:
-            logger.error(f"推理管线错误: {e}", exc_info=True)
+            logger.error(f"推理失败 / Inference failed: {e}", exc_info=True)
             raise

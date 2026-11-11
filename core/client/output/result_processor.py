@@ -121,7 +121,7 @@ class ResultProcessor:
         else:
             speed_label = ''
 
-        return f'    润色结果：{result_text}{speed_label}'
+        return f'    润色结果 / Polished text: {result_text}{speed_label}'
     
     async def start(self) -> None:
         """开启工作循环：等待内嵌引擎就绪，然后处理识别结果。"""
@@ -129,11 +129,11 @@ class ResultProcessor:
             await self.engine.wait_ready()
         except RuntimeError as e:
             console.print(f'[bold red]{e}[/bold red]')
-            console.print('[bold red]语音识别模型加载失败，程序即将退出。[/bold red]')
+            console.print('[bold red]语音识别模型加载失败，程序即将退出。 / Could not load the speech model. Exiting.[/bold red]')
             self.request_exit()
             return
 
-        console.print('[bold green]语音识别模型已就绪[/bold green]\n')
+        console.print('[bold green]语音识别模型已就绪 / Speech recognition model ready[/bold green]\n')
 
         while not self._exit_event.is_set():
             try:
@@ -174,7 +174,7 @@ class ResultProcessor:
             try:
                 text = zhconv_convert(text, Config.traditional_locale)
             except Exception as e:
-                logger.warning(f"繁体转换失败: {e}")
+                logger.warning(f"繁体转换失败 / Traditional Chinese conversion failed: {e}")
 
         # 热词总开关关闭时，不检索、不做规则替换，也不向 LLM 传热词提示。
         matched_hotwords = []
@@ -200,23 +200,23 @@ class ResultProcessor:
         self.state.last_recognition_text = text
 
         # 控制台输出：时延 + 热词时延合并到一行
-        hotword_label = f'  热词时延: {hotword_elapsed:.2f}s' if Config.hot else ''
-        console.print(f'    转录时延：{delay:.2f}s{hotword_label}')
+        hotword_label = f'  热词时延 / Hotword processing: {hotword_elapsed:.2f}s' if Config.hot else ''
+        console.print(f'    转录时延 / Transcription time: {delay:.2f}s{hotword_label}')
 
         # 先显示原始识别结果
         original_text_stripped = TextOutput.strip_punc(original_text)
-        console.print(f'    识别结果：[green]{original_text_stripped}')
+        console.print(f'    识别结果 / Transcript: [green]{original_text_stripped}')
 
         # 如果发生了热词替换，显示替换后的结果
         if original_text_stripped != text:
-            console.print(f'    热词替换：[cyan]{text}')
+            console.print(f'    热词替换 / Hotword corrections: [cyan]{text}')
             logger.debug(f"热词替换后: {text[:50]}{'...' if len(text) > 50 else ''}")
 
         # 1. 显示完全匹配/已替换的热词
         if matched_hotwords and Config.hot:
             # 提取热词文本 (现为 (原词, 热词, 分数))
             replaced_info = [f"{origin}->[green4]{hw}[/]" for origin, hw, score in matched_hotwords]
-            console.print(f'    完全匹配：{", ".join(replaced_info)}')
+            console.print(f'    完全匹配 / Exact matches: {", ".join(replaced_info)}')
 
         # 2. 潜在热词记录到 log
         if potential_hotwords and Config.hot:
@@ -231,7 +231,7 @@ class ResultProcessor:
         force_llm = self.state.force_llm
         self.state.force_llm = False
         if force_llm:
-            console.print(f'[bold yellow]🔔 录音期间检测到 {Config.force_llm_key} 按下[/bold yellow]')
+            console.print(f'[bold yellow]🔔 录音期间请求润色 / Polishing requested with {Config.force_llm_key}[/bold yellow]')
 
         if Config.llm_enabled and force_llm:
             llm_result = await self.app.llm.process_and_output(

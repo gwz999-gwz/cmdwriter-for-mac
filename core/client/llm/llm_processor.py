@@ -77,7 +77,7 @@ class LLMProcessor:
                 if 'Timeout' in error_type or 'timeout' in error_type:
                     # httpx.ReadTimeout 或 httpx.TimeoutException
                     wrapped_error = TimeoutErrorWrapper(e, 'qwen')
-                    logger.error(f"LLM API 请求超时: {wrapped_error}")
+                    logger.error(f"LLM API 请求超时 / AI polishing API request timed out: {wrapped_error}")
                     raise wrapped_error from e
 
             if isinstance(e, (
@@ -88,7 +88,7 @@ class LLMProcessor:
                 openai.APIError
             )):
                 wrapped_error = wrap_openai_error(e, 'qwen')
-                logger.error(f"LLM API 调用失败: {wrapped_error}")
+                logger.error(f"LLM API 调用失败 / AI polishing API request failed: {wrapped_error}")
                 raise wrapped_error from e
 
             # 其他未预期的异常，包装为 APIException 并抛出
@@ -161,7 +161,7 @@ class LLMProcessor:
                 finish_reason = chunk.choices[0].finish_reason
 
         if finish_reason == 'length':
-            raise APIException("LLM 输出达到 token 上限，润色结果可能被截断", 'qwen')
+            raise APIException("润色结果可能被截断 / The model reached the token limit and may have truncated its output", 'qwen')
 
         generation_time = time.time() - generation_start_time if generation_start_time else 0.0
         return full_response.strip(), total_tokens, generation_time

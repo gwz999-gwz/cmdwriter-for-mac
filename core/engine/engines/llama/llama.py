@@ -196,7 +196,7 @@ def logger_callback(level, message, user_data):
         else:
             logger.debug(f"[llama.cpp] {msg_str}")
     except Exception as e:
-        print(f"日志回调出错: {e}")
+        print(f"日志回调出错 / Log callback failed: {e}")
 
 def configure_logging(logs=True):
     """配置 llama.cpp 日志回调"""
@@ -515,7 +515,7 @@ class LlamaModel:
         if model:
             return model
         else:
-            logger.error(f"模型加载失败: {model_path}")
+            logger.error(f"模型加载失败 / Could not load model: {model_path}")
             return None
 
     def tokenize(self, text: str, add_special: bool = False, parse_special: bool = True) -> List[int]:
@@ -586,7 +586,7 @@ class LlamaContext:
             params.n_threads_batch = resolved_batch_threads
             self.ptr = llama_init_from_model(model.ptr, params)
         if not self.ptr:
-            raise RuntimeError("上下文初始化失败")
+            raise RuntimeError("上下文初始化失败 / Could not initialize the model context")
 
     def decode(self, batch):
         struct = batch.struct if hasattr(batch, 'struct') else batch
@@ -599,7 +599,7 @@ class LlamaContext:
         token_id = int(token_id)
         if not 0 <= token_id < self.model.n_vocab:
             raise ValueError(
-                f"Token ID 越界: {token_id}, 词表范围=0..{self.model.n_vocab - 1}"
+                f"Token ID 越界 / Token ID out of range: {token_id}, 词表范围=0..{self.model.n_vocab - 1}"
             )
         return self.decode(get_one_batch(token_id))
 
@@ -660,7 +660,7 @@ class LlamaBatch:
         """
         n_tokens = data.shape[0]
         if n_tokens > self.n_tokens_max:
-            raise ValueError(f"Batch 空间不足: {n_tokens} > {self.n_tokens_max}")
+            raise ValueError(f"Batch 空间不足 / Batch capacity exceeded: {n_tokens} > {self.n_tokens_max}")
         
         # 1. 内存移动 (Embedding)
         if not data.flags['C_CONTIGUOUS']:
@@ -987,7 +987,7 @@ def get_token_embeddings_gguf(model_path, target_tensor="token_embd.weight"):
     data_offset = offs
     
     if target_shape is None:
-        logger.error(f"无法在 {model_path} 中找到 {target_tensor}")
+        logger.error(f"未找到张量 / Could not find {target_tensor} in {model_path}")
         return None
         
     abs_offset = data_offset + target_rel_offset
@@ -1005,7 +1005,7 @@ def get_token_embeddings_gguf(model_path, target_tensor="token_embd.weight"):
         elif qtype == GGMLQuantizationType.F16:
             bytes_per_row = n_embd * 2
         else:
-            raise ValueError(f"未知的数据格式支持: {qtype.name}")
+            raise ValueError(f"未知的数据格式 / Unrecognized data type: {qtype.name}")
 
     total_bytes = vocab_size * bytes_per_row
     raw_data = mm[abs_offset : abs_offset + total_bytes]

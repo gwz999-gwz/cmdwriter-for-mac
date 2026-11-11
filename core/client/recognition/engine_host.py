@@ -151,7 +151,7 @@ class EngineHost:
         except Exception as e:
             self._failed = True
             self._load_error = e
-            logger.error(f"语音识别模型加载失败: {e}", exc_info=True)
+            logger.error(f"语音识别模型加载失败 / Could not load the speech recognition model: {e}", exc_info=True)
 
     def _inference_loop(self) -> None:
         """后台推理线程。
@@ -256,7 +256,7 @@ class EngineHost:
             # False 表示已经尝试但失败，避免后续每个文件分片重复加载。
             self._aligner = False
             self._pipeline.aligner = None
-            logger.warning(f"对齐模型加载失败，将不生成精确时间戳: {e}")
+            logger.warning(f"对齐模型加载失败，将不生成精确时间戳 / Could not load the aligner. Precise timestamps are unavailable: {e}")
 
     # ------------------------------------------------------------
     # 本地异步接口
@@ -267,7 +267,7 @@ class EngineHost:
         while not self._ready.is_set() and not self._failed:
             await asyncio.sleep(0.1)
         if self._failed:
-            raise RuntimeError(f"语音识别模型加载失败: {self._load_error}")
+            raise RuntimeError(f"语音识别模型加载失败 / Could not load the speech recognition model: {self._load_error}")
         if self._result_queue is None:
             self._result_queue = asyncio.Queue()
         return True
@@ -372,7 +372,7 @@ class EngineHost:
             return await self._result_queue.get()
         queue_for_task = self._task_result_queues.get(task_id)
         if queue_for_task is None:
-            raise RuntimeError(f"任务结果队列未注册: {task_id}")
+            raise RuntimeError(f"任务结果队列未注册 / Task result queue not registered: {task_id}")
         return await queue_for_task.get()
 
     async def close(self) -> None:
@@ -400,7 +400,7 @@ class EngineHost:
                 try:
                     engine.cleanup()
                 except Exception as e:
-                    logger.warning(f"引擎清理失败: {e}")
+                    logger.warning(f"引擎清理失败 / Could not clean up the inference engine: {e}")
         self._engine = None
         self._aligner = None
         self._pipeline = None

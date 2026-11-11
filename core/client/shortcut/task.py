@@ -59,7 +59,7 @@ class ShortcutTask:
         self._mic_pool: Optional[ThreadPoolExecutor] = None
 
         # 录音状态动画
-        self._status = Status('开始录音', spinner='point')
+        self._status = Status('录音中 / Recording', spinner='point')
 
     @property
     def state(self) -> ClientState:

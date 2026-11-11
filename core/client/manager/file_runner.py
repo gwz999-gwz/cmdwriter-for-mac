@@ -11,7 +11,7 @@ class FileRunner:
     """
     def __init__(self, app, files: list[Path], output_mode: str):
         if output_mode not in {"txt", "srt", "both"}:
-            raise ValueError("文件转录必须指定 txt、srt 或 both 输出格式")
+            raise ValueError("文件转录须指定 txt、srt 或 both / File transcription requires txt, srt, or both")
         self.app = app
         self.files = files
         self.output_mode = output_mode
@@ -33,19 +33,19 @@ class FileRunner:
         
         TipsDisplay.show_file_tips()
         
-        logger.info(f"待处理文件: {[str(f) for f in self.files]}")
+        logger.info(f"待处理文件 / Files queued: {[str(f) for f in self.files]}")
         
         
         # 热词总开关也适用于音视频文件转录。
         if Config.hot:
             self.app.hotword.start()
         else:
-            logger.info("热词功能已关闭，文件转录不加载热词资源")
+            logger.info("文件转录热词已关闭 / Hotwords disabled for file transcription")
 
         try:
             for file in self.files:
 
-                logger.info(f"正在处理文件: {file}")
+                logger.info(f"正在处理文件 / Processing file: {file}")
                 
                 # 情况 1：文本类文件，执行 SRT 时间轴调整
                 if file.suffix.lower() in ['.txt', '.json', '.srt', '.vtt']:
@@ -65,17 +65,17 @@ class FileRunner:
                         await transcriber.receive()
                         await transcriber.close()
                 
-                logger.info(f"文件处理完成: {file}")
+                logger.info(f"文件处理完成 / File processed: {file}")
             
-            logger.info("所有文件已处理完成")
+            logger.info("所有文件已处理完成 / All files processed")
 
             try:
-                input('\n按回车退出\n')
+                input('\n按回车退出 / Press Return to exit\n')
             except EOFError:
                 pass  # 非交互环境（如脚本调用）直接退出
 
         except Exception as e:
-            logger.error(f"文件模式运行异常: {e}", exc_info=True)
+            logger.error(f"文件转录异常 / File transcription failed: {e}", exc_info=True)
             raise
         finally:
             self.app.hotword.stop()

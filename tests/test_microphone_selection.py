@@ -13,7 +13,7 @@ from core.ui import tk_host, tray
 class MicrophoneMenuTests(unittest.TestCase):
     def test_menu_lists_default_and_available_microphones_as_radio_items(self):
         stream = SimpleNamespace(
-            device_info="🎤 MacBook 麦克风，声道数：1",
+            device_info="🎤 MacBook 麦克风，声道数 / Channels: 1",
             follows_system_default=False,
             selected_device_id=4,
             get_input_devices=Mock(return_value=[
@@ -25,11 +25,11 @@ class MicrophoneMenuTests(unittest.TestCase):
 
         microphone_menu = next(
             option[1] for option in manager._build_menu_options()
-            if option[0] == "🎤 选择麦克风"
+            if option[0] == "🎤 选择麦克风 / Choose microphone"
         )
 
         self.assertEqual([item[0] for item in microphone_menu[:3]], [
-            '跟随系统默认', 'MacBook 麦克风', '蓝牙耳机',
+            '跟随系统默认 / Follow system default', 'MacBook 麦克风', '蓝牙耳机',
         ])
         self.assertFalse(microphone_menu[0][2](None))
         self.assertFalse(microphone_menu[1][2](None))
@@ -84,7 +84,7 @@ class AudioStreamDeviceTests(unittest.TestCase):
             self.assertEqual(Config.mic_device, 'FIIO BTR11')
 
             tk_host._pump()
-            menu.update_info_text.assert_called_once_with('🎤 FIIO BTR11，声道数：1')
+            menu.update_info_text.assert_called_once_with('🎤 FIIO BTR11，声道数 / Channels: 1')
             menu.update_options.assert_called_once()
             mic_options = menu.update_options.call_args.args[0][1][1]
             self.assertTrue(mic_options[1][2](None))
@@ -116,7 +116,7 @@ class AudioStreamDeviceTests(unittest.TestCase):
 
         self.assertIs(result, fake_stream)
         self.assertEqual(manager.selected_device_id, 1)
-        self.assertEqual(manager.device_info, '🎤 蓝牙耳机，声道数：1')
+        self.assertEqual(manager.device_info, '🎤 蓝牙耳机，声道数 / Channels: 1')
         self.assertEqual(input_stream.call_args.kwargs['device'], 1)
 
 

@@ -34,17 +34,17 @@ from core.client.app import CapsWriterClient
 def parse_start_args(argv: list[str]) -> tuple[list[str], str | None]:
     """解析启动参数；文件模式必须显式指定本次输出格式。"""
     parser = argparse.ArgumentParser(
-        description="CapsWriter Offline 本地语音输入与文件转录"
+        description="本地语音输入与文件转录 / Local dictation and file transcription"
     )
     parser.add_argument(
         "--output",
         choices=("txt", "srt", "both"),
-        help="文件转录输出格式；拖放脚本会在每次任务中询问",
+        help="文件转录输出格式，拖放脚本会询问 / Output format for file transcription",
     )
     parser.add_argument("files", nargs="*")
     args = parser.parse_args(argv)
     if args.files and args.output is None:
-        parser.error("文件转录必须用 --output txt、srt 或 both 指定本次输出格式")
+        parser.error("文件转录须指定 --output txt、srt 或 both / File transcription requires --output txt, srt, or both")
     return args.files, args.output
 
 

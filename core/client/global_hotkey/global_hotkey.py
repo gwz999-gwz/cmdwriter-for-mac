@@ -97,7 +97,7 @@ class GlobalHotkeyManager:
             return
         
         if not self._hotkeys:
-            logger.warning("没有注册的快捷键，跳过启动")
+            logger.warning("没有注册的快捷键 / No shortcuts registered")
             return
         
         self._running = True
@@ -111,7 +111,7 @@ class GlobalHotkeyManager:
             try:
                 self._listener.stop()
             except Exception as e:
-                logger.warning(f"停止 GlobalHotKeys 监听器时出错: {e}")
+                logger.warning(f"停止快捷键监听失败 / Could not stop the global shortcut listener: {e}")
             self._listener = None
         logger.info("GlobalHotkeyManager 已停止")
 
@@ -125,7 +125,7 @@ class GlobalHotkeyManager:
             self._listener.start()
             logger.debug(f"GlobalHotKeys 监听器已启动: {list(self._hotkeys.keys())}")
         except Exception as e:
-            logger.error(f"启动 GlobalHotKeys 监听器失败: {e}")
+            logger.error(f"启动快捷键监听失败 / Could not start the global shortcut listener: {e}")
             self._listener = None
 
     def _restart_listener(self) -> None:

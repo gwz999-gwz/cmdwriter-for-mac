@@ -50,12 +50,12 @@ def press_and_release(key_name: str) -> None:
         keyboard, controller = _get_controller()  # noqa: F841
         key = _resolve_key(key_name)
         if key is None:
-            logger.warning(f"[{key_name}] 无法识别的按键，跳过")
+            logger.warning(f"[{key_name}] 跳过未知按键 / Skipping an unrecognized key")
             return
         controller.press(key)
         controller.release(key)
     except Exception as e:
-        logger.warning(f"模拟按键失败 ({key_name}): {e}")
+        logger.warning(f"模拟按键失败 / Could not send key {key_name}: {e}")
 
 
 def press_enter() -> None:

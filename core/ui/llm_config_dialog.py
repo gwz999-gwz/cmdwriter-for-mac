@@ -23,7 +23,7 @@ def load_config(config_path: Path) -> dict[str, str]:
     """从指定文件加载设置，不依赖模块缓存。"""
     spec = importlib.util.spec_from_file_location("capswriter_dialog_llm_config", config_source(config_path))
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"无法加载 {config_path}")
+        raise RuntimeError(f"无法加载 / Could not load {config_path}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return {name: str(getattr(module, name, "")) for name in CONFIG_NAMES}
@@ -58,7 +58,7 @@ def update_config(config_path: Path, values: dict[str, str]) -> None:
 
     missing = set(CONFIG_NAMES) - found
     if missing:
-        raise RuntimeError(f"配置文件缺少字段: {', '.join(sorted(missing))}")
+        raise RuntimeError(f"配置文件缺少字段 / Missing configuration fields: {', '.join(sorted(missing))}")
     for start, end, replacement in sorted(replacements, reverse=True):
         source_bytes = source_bytes[:start] + replacement + source_bytes[end:]
 
@@ -75,7 +75,7 @@ class LLMConfigDialog:
         self.config_path = config_path
         self.values = load_config(config_path)
         self.root = tk.Tk()
-        self.root.title("CapsWriter — AI 润色设置")
+        self.root.title("AI 润色设置 / AI polishing settings")
         self.root.geometry("720x650")
         self.root.minsize(620, 520)
         self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
@@ -87,11 +87,11 @@ class LLMConfigDialog:
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(4, weight=1)
 
-        ttk.Label(frame, text="修改后点击保存，新的润色请求会立即使用这些设置。",
+        ttk.Label(frame, text="保存后，后续润色会使用新设置。\nNew polishing requests use the settings as soon as you save.",
                   foreground="#666666").grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 14))
 
         self.entries = {}
-        labels = (("api_url", "API 地址"), ("api_key", "API Key"), ("model", "模型名称"))
+        labels = (("api_url", "API 地址 / API URL"), ("api_key", "API 密钥 / API key"), ("model", "模型名称 / Model name"))
         for row, (name, label) in enumerate(labels, start=1):
             ttk.Label(frame, text=label).grid(row=row, column=0, sticky="w", padx=(0, 12), pady=5)
             entry = ttk.Entry(frame, show="•" if name == "api_key" else "")
@@ -99,7 +99,7 @@ class LLMConfigDialog:
             entry.grid(row=row, column=1, sticky="ew", pady=5)
             self.entries[name] = entry
 
-        ttk.Label(frame, text="系统提示词").grid(row=4, column=0, columnspan=2, sticky="nw", pady=(12, 5))
+        ttk.Label(frame, text="系统提示词 / System prompt").grid(row=4, column=0, columnspan=2, sticky="nw", pady=(12, 5))
         prompt_frame = ttk.Frame(frame)
         prompt_frame.grid(row=5, column=0, columnspan=2, sticky="nsew")
         prompt_frame.columnconfigure(0, weight=1)
@@ -114,8 +114,8 @@ class LLMConfigDialog:
 
         buttons = ttk.Frame(frame)
         buttons.grid(row=6, column=0, columnspan=2, pady=(15, 0))
-        ttk.Button(buttons, text="取消", command=self.root.destroy).pack(side="left", padx=6)
-        ttk.Button(buttons, text="保存设置", command=self._save).pack(side="left", padx=6)
+        ttk.Button(buttons, text="取消 / Cancel", command=self.root.destroy).pack(side="left", padx=6)
+        ttk.Button(buttons, text="保存设置 / Save settings", command=self._save).pack(side="left", padx=6)
         self.root.bind("<Escape>", lambda _event: self.root.destroy())
         self.root.lift()
 
@@ -124,12 +124,12 @@ class LLMConfigDialog:
         values["system_prompt"] = self.prompt.get("1.0", "end-1c").strip()
         empty = [name for name in CONFIG_NAMES if not values[name]]
         if empty:
-            messagebox.showwarning("设置不完整", "API 地址、API Key、模型名称和系统提示词都不能为空。")
+            messagebox.showwarning("设置不完整 / Incomplete settings", "请填写所有字段。\nComplete all fields.")
             return
         try:
             update_config(self.config_path, values)
         except Exception as exc:
-            messagebox.showerror("保存失败", str(exc))
+            messagebox.showerror("保存失败 / Save failed", str(exc))
             return
         self.root.destroy()
 

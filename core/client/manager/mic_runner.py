@@ -19,10 +19,10 @@ def _check_macos_accessibility() -> None:
 
     from core.client.state import console
     console.print(
-        '[bold yellow]⚠️ 未获得 macOS「辅助功能」权限[/bold yellow]\n'
-        '    全局按键监听不可用，录音与强制润色快捷键将无法使用。\n'
+        '[bold yellow]⚠️ 未获得 macOS「辅助功能」权限 / macOS Accessibility permission required[/bold yellow]\n'
+        '    录音和润色快捷键暂不可用。 / Recording and polishing shortcuts are unavailable.\n'
         '    请在 [bold]系统设置 → 隐私与安全性 → 辅助功能[/bold] 中勾选本程序'
-        '（源码运行勾选「终端」，编译后勾选对应 App），然后重启本程序。\n'
+        '（源码运行勾选「终端」，编译后勾选对应 App），然后重启本程序。\n    In System Settings → Privacy & Security → Accessibility, allow Terminal for source installs or allow the built app, then restart.\n'
     )
 
 
@@ -53,7 +53,7 @@ class MicRunner:
 
         # 1. 音频流（需在托盘之前启动，托盘菜单要显示设备信息）
         if Config.mic_only_on_press:
-            logger.info("已启用「仅按下录音快捷键时启用麦克风」，启动时不打开音频流")
+            logger.info("仅按下时启用麦克风 / Microphone opens when recording starts")
             self.app.stream.prepare()       # 只建流不启动，让托盘能看到设备名
         else:
             self.app.stream.start()
@@ -71,7 +71,7 @@ class MicRunner:
         if Config.hot:
             self.app.hotword.start()
         else:
-            logger.info("热词功能已关闭，跳过热词资源加载")
+            logger.info("热词功能已关闭 / Hotwords disabled")
         self.app.llm.start()
 
     async def run(self):
@@ -79,7 +79,7 @@ class MicRunner:
         
         logger.info("=" * 50)
         logger.info(f"CapsWriter Offline Client {__version__} (麦克风模式)")
-        logger.info(f"日志级别: {Config.log_level}")
+        logger.info(f"日志级别 / Log level: {Config.log_level}")
         
         # 1. 资源启动
         await self.app.file_server.start()

@@ -31,7 +31,7 @@ class TrayHotwordToggleTests(unittest.TestCase):
 
         option = next(
             option for option in manager._build_menu_options()
-            if option[0] == "🔥 启用热词"
+            if option[0] == "🔥 启用热词 / Enable hotwords"
         )
 
         self.assertIs(option[1].__self__, manager)

@@ -24,12 +24,12 @@ def _show_native_dialog_and_save(base_dir: Optional[str]) -> None:
     script = r'''
 tell application "System Events"
     activate
-    set dialogResult to display dialog "输入一个热词（也可以粘贴多行）：" ¬
+    set dialogResult to display dialog "每行输入一个热词。 / Enter one hotword per line." ¬
         default answer "" ¬
-        buttons {"取消", "添加到热词"} ¬
-        default button "添加到热词" ¬
-        cancel button "取消" ¬
-        with title "CapsWriter — 添加热词"
+        buttons {"取消 / Cancel", "添加 / Add"} ¬
+        default button "添加 / Add" ¬
+        cancel button "取消 / Cancel" ¬
+        with title "添加热词 / Add hotwords"
     return text returned of dialogResult
 end tell
 '''
@@ -44,8 +44,8 @@ end tell
         # 用户点击取消时 osascript 返回 1 和 -128，不属于程序错误。
         if result.returncode != 0:
             if "(-128)" not in result.stderr:
-                logger.error("无法打开热词输入框: %s", result.stderr.strip())
-                console.print(f'[red]无法打开热词输入框: {result.stderr.strip()}[/]')
+                logger.error("无法打开热词输入框 / Could not open hotword dialog: %s", result.stderr.strip())
+                console.print(f'[red]无法打开热词输入框 / Could not open hotword dialog: {result.stderr.strip()}[/]')
             return
 
         hotword_text = result.stdout.rstrip("\n").strip()
@@ -54,14 +54,14 @@ end tell
 
         added, skipped = _save_hotwords(hotword_text, base_dir)
         if added:
-            console.print(f'[green]✓[/] 已添加热词: {"、".join(added)}')
+            console.print(f'[green]✓[/] 已添加热词 / Hotwords added: {"、".join(added)}')
         if skipped:
-            console.print(f'[yellow]已存在，未重复添加: {"、".join(skipped)}[/]')
+            console.print(f'[yellow]已存在，未重复添加 / Skipped duplicates: {"、".join(skipped)}[/]')
     except subprocess.TimeoutExpired:
-        logger.warning("热词输入窗口等待超时，已取消")
+        logger.warning("热词输入超时，已取消 / Hotword entry timed out and was canceled")
     except Exception as exc:
-        logger.error("处理“添加热词”时发生错误: %s", exc, exc_info=True)
-        console.print(f'[red]添加热词失败: {exc}[/]')
+        logger.error("添加热词失败 / Could not add hotwords: %s", exc, exc_info=True)
+        console.print(f'[red]添加热词失败 / Could not add hotwords: {exc}[/]')
 
 
 def _save_hotwords(text: str, base_dir: Optional[str] = None) -> tuple[list[str], list[str]]:

@@ -54,8 +54,8 @@
     NSURL *logFile = [logDir URLByAppendingPathComponent:@"app-launch.log"];
 
     if (![[NSFileManager defaultManager] isExecutableFileAtPath:python.path]) {
-        [self showError:@"CapsWriter 无法启动"
-                message:@"未找到项目虚拟环境 .venv。请先按照 readme.md 安装依赖。"];
+        [self showError:@"无法启动 / Cannot start CmdWriter"
+                message:@"未找到项目虚拟环境 .venv。请先按照 README.md 安装依赖。\nThe .venv directory is missing. Follow README.md to install the dependencies."];
         [NSApp terminate:nil];
         return;
     }
@@ -80,7 +80,7 @@
 
     NSError *error = nil;
     if (![task launchAndReturnError:&error]) {
-        [self showError:@"CapsWriter 启动失败" message:error.localizedDescription];
+        [self showError:@"启动失败 / CmdWriter startup failed" message:error.localizedDescription];
         [NSApp terminate:nil];
         return;
     }

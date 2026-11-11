@@ -41,7 +41,7 @@ def safe_paste() -> str:
         return ""
 
     except Exception as e:
-        logger.warning(f"剪贴板读取失败: {e}")
+        logger.warning(f"剪贴板读取失败 / Could not read the clipboard: {e}")
         return ""
 
 
@@ -63,7 +63,7 @@ def safe_copy(content: str) -> bool:
         logger.debug(f"剪贴板写入成功，长度: {len(content)}")
         return True
     except Exception as e:
-        logger.warning(f"剪贴板写入失败: {e}")
+        logger.warning(f"剪贴板写入失败 / Could not write to the clipboard: {e}")
         return False
 
 

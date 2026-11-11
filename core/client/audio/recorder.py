@@ -63,8 +63,8 @@ class AudioRecorder:
         """发送消息到识别引擎（内部会等待模型就绪，不丢音频）"""
         success = await self._ws_manager.send(message)
         if not success and message.is_final:
-            console.print('    语音识别模型不可用，无法发送\n')
-            logger.warning("语音识别模型不可用，无法发送音频数据")
+            console.print('    语音识别模型不可用，无法发送 / Speech model unavailable. Could not submit recording.\n')
+            logger.warning("语音识别模型不可用，无法发送 / Speech model unavailable. Could not submit recording.音频数据")
     
     async def record_and_send(self) -> None:
         """
@@ -142,8 +142,8 @@ class AudioRecorder:
                         )
                         asyncio.create_task(self._send_message(message))
 
-                    console.print(f'任务标识：{self.task_id}')
-                    console.print(f'    录音时长：{self._duration:.2f}s')
+                    console.print(f'任务标识 / Task ID: {self.task_id}')
+                    console.print(f'    录音时长 / Recording duration: {self._duration:.2f}s')
                     logger.info(f"录音任务完成，任务ID: {self.task_id}, 时长: {self._duration:.2f}s")
                     
                     # 告诉本地引擎音频片段结束了
@@ -162,5 +162,5 @@ class AudioRecorder:
                     break
                     
         except Exception as e:
-            logger.error(f"录音任务错误: {e}", exc_info=True)
+            logger.error(f"录音任务失败 / Recording task failed: {e}", exc_info=True)
     

@@ -24,12 +24,12 @@ async def handle_typing_mode(handler, text: str, matched_hotwords=None, role_con
         )
         if not polished_text or not polished_text.strip():
             from .llm_exceptions import APIException
-            raise APIException("LLM 返回空文本", 'qwen')
+            raise APIException("LLM 返回空文本 / The model returned empty text", 'qwen')
 
         final_text = TextOutput.strip_punc(polished_text)
         if not final_text:
             from .llm_exceptions import APIException
-            raise APIException("LLM 润色结果经处理后为空", 'qwen')
+            raise APIException("润色结果经处理后为空 / The polished result was empty after formatting", 'qwen')
 
         await paste_text(final_text)
         return (final_text, token_count, gen_time, True)

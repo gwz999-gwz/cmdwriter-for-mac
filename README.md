@@ -1,8 +1,77 @@
 # CmdWriter for Mac
 
+[English](#english) · [简体中文](#简体中文)
+
+## English
+
+Local dictation and audio/video transcription for macOS. Speech recognition, hotword correction, and subtitle alignment run on your Mac. Optional AI polishing uses an API you configure.
+
+### Install
+
+The setup script installs the llama.cpp runtime for Apple silicon (M-series Macs). With Homebrew installed, open Terminal in the project root, where `start.py` is located, and run:
+
+```bash
+brew install uv ffmpeg portaudio
+uv venv --python 3.13 .venv
+uv pip install -r requirements-macos.txt --python .venv/bin/python
+bash setup_macos_llama.sh
+```
+
+FFmpeg is required for audio/video transcription. If the settings dialog fails to open, run `.venv/bin/python -m tkinter` to check Tk support.
+
+### Download and place the models
+
+Open the Assets section of the [upstream Models release](https://github.com/HaujetZhao/CapsWriter-Offline/releases/tag/models), then download and extract:
+
+- `Qwen3-ASR-1.7B-q5_k.zip` for dictation and file transcription.
+- `Qwen3-ForcedAligner-0.6B.zip` for SRT timestamps. You can skip this model for dictation and TXT output.
+
+Create `models` next to `start.py`. Match the names and capitalization below. If extraction adds a folder named after the ZIP, move the files from that extra folder into the paths shown here.
+
+```text
+cmdwriter-for-mac/
+├── start.py
+└── models/
+    ├── Qwen3-ASR/
+    │   └── Qwen3-ASR-1.7B/
+    │       ├── qwen3_asr_encoder_frontend.onnx
+    │       ├── qwen3_asr_encoder_backend.onnx
+    │       └── qwen3_asr_llm.q5_k.gguf
+    └── Qwen3-ForcedAligner/
+        └── Qwen3-ForcedAligner-0.6B/
+            ├── qwen3_aligner_encoder_frontend.int4.onnx
+            ├── qwen3_aligner_encoder_backend.int4.onnx
+            └── qwen3_aligner_llm.q5_k.gguf
+```
+
+### Use
+
+1. Double-click `start-client.command` to start dictation.
+2. Hold Right Command while speaking and release it to insert the result at the cursor. In the menu bar, choose **Recording mode** to switch to press-to-toggle recording. The client saves the setting and restarts.
+3. After configuring AI polishing, press Right Option while recording to polish the current utterance.
+4. Double-click `transcribe-media.command`, drag audio or video files into its Terminal window, and press Return. Choose TXT, SRT, or both. TXT skips forced alignment, while SRT includes precise subtitle timestamps.
+
+When the dictation client has already loaded the model, file transcription reuses it. The client can queue dictation and file requests and runs inference for each task in turn.
+
+On first launch, grant Terminal Microphone, Accessibility, and Input Monitoring permissions in **System Settings → Privacy & Security**, then quit and reopen Terminal.
+
+### Menu bar and settings
+
+The menu bar icon indicates when recording is active. Use **Choose microphone** to select an input device or follow the system default. Select **Refresh devices** if a newly connected device is missing. You can also copy the last result, add hotwords, toggle hotword correction, edit AI polishing settings, reopen the audio stream, restart, or quit.
+
+- `hot.txt` contains phonetic hotwords and aliases. `hot-rule.txt` contains regular-expression replacements. The hotword switch applies to both dictation and file transcription.
+- `config.py` contains application settings, including `language`. The default detects the spoken language automatically.
+- **AI polishing settings** lets you enter an API URL, key, model, and system prompt. Your first save creates a local `llm_config.py`. The repository includes an empty API example and a general-purpose Chinese polishing prompt. Offline speech recognition works without API configuration.
+
+### Upstream project
+
+The macOS implementation is adapted from Haujet Zhao's [CapsWriter-Offline](https://github.com/HaujetZhao/CapsWriter-Offline). See the [upstream releases](https://github.com/HaujetZhao/CapsWriter-Offline/releases) for the original project and model downloads. The upstream MIT license and copyright notice are in [LICENSE](LICENSE).
+
+## 简体中文
+
 macOS 语音输入与音视频转文字工具。语音识别、热词纠错和字幕对齐在 Mac 上本地运行。可选的 AI 润色使用你自行配置的 API。
 
-## 安装
+### 安装
 
 安装脚本使用适用于 Apple 芯片（M 系列）的 llama.cpp 运行库。先在终端安装依赖，再进入项目根目录（含 `start.py` 的目录）执行：
 
@@ -15,7 +84,7 @@ bash setup_macos_llama.sh
 
 `ffmpeg` 用于音视频文件转录。若菜单设置窗口打不开，可用 `.venv/bin/python -m tkinter` 检查当前 Python 是否支持 Tk。
 
-## 下载和放置模型
+### 下载和放置模型
 
 在[上游 Models 发布页](https://github.com/HaujetZhao/CapsWriter-Offline/releases/tag/models)的 Assets 中下载并解压：
 
@@ -40,24 +109,24 @@ cmdwriter-for-mac/
             └── qwen3_aligner_llm.q5_k.gguf
 ```
 
-## 使用
+### 使用
 
-1. 直接双击 `启动客户端.command`，进入麦克风语音输入模式。
-2. 默认按住右 Command 说话，松开后识别结果输入当前光标位置。菜单栏“说话方式”可切换为“按一下说话”：按一下右 Command 开始录音，说完后再按一下结束。切换会保存设置并自动重启客户端。
+1. 直接双击 `start-client.command`，进入麦克风语音输入模式。
+2. 默认按住右 Command 说话，松开后识别结果输入当前光标位置。菜单栏“说话方式 / Recording mode”可切换为“按一下说话”：按一下右 Command 开始录音，说完后再按一下结束。切换会保存设置并自动重启客户端。
 3. 配置 AI 润色后，录音过程中按一下右 Option 可润色本句。
-4. 双击 `拖放音视频转字幕.command`，再将一个或多个音频、视频文件拖进打开的终端窗口，按回车后为本次任务选择 TXT、SRT 或两者。TXT 模式跳过强制对齐、速度更快；SRT 模式生成精确字幕时间轴。
+4. 双击 `transcribe-media.command`，再将一个或多个音频、视频文件拖进打开的终端窗口，按回车后为本次任务选择 TXT、SRT 或两者。TXT 模式跳过强制对齐、速度更快；SRT 模式生成精确字幕时间轴。
 
-如果 `启动客户端.command` 已经在运行且模型加载完成，转字幕窗口会自动把文件交给该客户端，复用内存中的模型；客户端未运行时，转字幕窗口才会自行加载模型。文件转录和麦克风识别可以同时提交，内部会按任务隔离并依次使用推理引擎。
+如果 `start-client.command` 已经在运行且模型加载完成，转字幕窗口会自动把文件交给该客户端，复用内存中的模型；客户端未运行时，转字幕窗口才会自行加载模型。文件转录和麦克风识别可以同时提交，内部会按任务隔离并依次使用推理引擎。
 
 首次运行需要在“系统设置 → 隐私与安全性”中，为终端开启麦克风、辅助功能和输入监控权限。授权后需要完全退出并重新打开终端。
 
-## 菜单栏图标
+### 菜单栏图标
 
 启动成功后，macOS 菜单栏会显示 CapsWriter 图标。点击图标后，在“选择麦克风”子菜单中可以切换 Mac 自带麦克风、蓝牙耳机等输入设备，也可以选择“跟随系统默认”；选择会保存并在下次启动时继续使用。设备刚连接却未显示时，点击子菜单底部的“刷新设备列表”。菜单还可用于复制结果、直接添加热词、启用或关闭热词、修改 AI 润色设置、切换麦克风模式、重开音频、重启或退出。关闭“启用热词”后，麦克风识别和音视频转字幕都不会加载或应用 `hot.txt`、`hot-rule.txt`，该设置会保存并自动重启客户端生效。录音时图标会反色提示，识别和润色结果始终直接输入当前光标位置。
 
 单击 macOS 菜单栏图标即可显示功能菜单。
 
-## 识别增强
+### 识别增强
 
 - `hot.txt`：音素模糊热词纠错。
 - `hot-rule.txt`：正则强制替换。
@@ -65,10 +134,10 @@ cmdwriter-for-mac/
 - Qwen Forced Aligner：为文件转录生成精确字幕时间戳。
 - LLM 润色：录音时按右 Option 触发。
 
-## 配置
+### 配置
 
-程序设置位于 `config.py`；AI 润色的 API 地址、API Key、模型和提示词可从菜单栏的“修改 AI 润色设置”对话框编辑，首次保存会在根目录创建个人配置 `llm_config.py`。仓库中的 `llm_config_example.py` 留空了 API 地址和密钥，可直接使用离线识别。
+程序设置位于 `config.py`；AI 润色的 API 地址、API Key、模型和提示词可从菜单栏的“修改 AI 润色设置”对话框编辑，首次保存会在根目录创建个人配置 `llm_config.py`。仓库中的 `llm_config_example.py` 留空了 API 地址和密钥，并附通用的中文润色提示词。离线识别可以直接使用。
 
-## 上游项目
+### 上游项目
 
 CmdWriter for Mac 的 macOS 实现参考并改编自 Haujet Zhao 的 [CapsWriter-Offline](https://github.com/HaujetZhao/CapsWriter-Offline)。原项目版本及模型资源见 [CapsWriter-Offline Releases](https://github.com/HaujetZhao/CapsWriter-Offline/releases)。上游 MIT 许可证及版权声明见 [LICENSE](LICENSE)。

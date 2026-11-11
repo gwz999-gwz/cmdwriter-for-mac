@@ -62,7 +62,7 @@ class FileTranscriber:
         self.save_txt = save_txt
         self.save_srt = save_srt
         if not self.save_txt and not self.save_srt:
-            raise ValueError("TXT 和 SRT 至少选择一种输出格式")
+            raise ValueError("请至少选择一种输出格式 / Select TXT, SRT, or both")
 
     @property
     def state(self) -> ClientState:
@@ -78,7 +78,7 @@ class FileTranscriber:
         """检查转录条件"""
         # 检查文件是否存在
         if not self.file.exists():
-            logger.error(f"文件不存在: {self.file}")
+            logger.error(f"文件不存在 / File not found: {self.file}")
             return False
 
         # 检查媒体工具环境 (FFmpeg)
@@ -87,7 +87,7 @@ class FileTranscriber:
 
         # 等待本地识别引擎准备完成
         if not await self._ws_manager.connect():
-            logger.error("本地识别引擎不可用")
+            logger.error("本地识别引擎不可用 / Local speech recognition engine unavailable")
             return False
         
         
@@ -98,19 +98,19 @@ class FileTranscriber:
         
         self.task_id = str(uuid.uuid1())
         await self._ws_manager.register_result_queue(self.task_id)
-        console.print(f'\n任务标识：{self.task_id}')
-        console.print(f'    处理文件：{self.file}')
+        console.print(f'\n任务标识 / Task ID: {self.task_id}')
+        console.print(f'    处理文件 / File: {self.file}')
         output_names = []
         if self.save_txt:
             output_names.append('TXT')
         if self.save_srt:
             output_names.append('SRT')
-        console.print(f'    输出格式：{" + ".join(output_names)}')
+        console.print(f'    输出格式 / Output format: {" + ".join(output_names)}')
         
         # 1. 预先获取时长
         self._audio_duration = await MediaTool.get_audio_duration(self.file)
         if self._audio_duration > 0:
-            console.print(f'    音频长度：{self._audio_duration:.2f}s')
+            console.print(f'    音频长度 / Audio duration: {self._audio_duration:.2f}s')
         
         logger.info(f"开始转录文件: {self.file}, 任务ID: {self.task_id}")
         
@@ -157,7 +157,7 @@ class FileTranscriber:
                     save_srt=self.save_srt,
                 )
                 if not await self._ws_manager.send(message):
-                    raise ConnectionError("消息发送失败，连接可能已断开")
+                    raise ConnectionError("消息发送失败，连接可能已断开 / Could not send the message. The connection may have closed.")
 
             # 发送结束标志
             final_message = AudioMessage(
@@ -173,22 +173,22 @@ class FileTranscriber:
                 save_srt=self.save_srt,
             )
             if not await self._ws_manager.send(final_message):
-                raise ConnectionError("结束标志发送失败")
+                raise ConnectionError("结束标志发送失败 / Could not send the end-of-stream marker")
             await process.wait()
             
             if self._audio_duration == 0:
                 self._audio_duration = progress 
-                console.print(f'    音频长度：{self._audio_duration:.2f}s')
+                console.print(f'    音频长度 / Audio duration: {self._audio_duration:.2f}s')
 
             logger.debug("音频数据发送完成")
             
         except ConnectionError as e:
-            logger.error(f"发送数据失败: {e}, 文件: {self.file}")
+            logger.error(f"发送数据失败 / Could not send audio data: {e}, 文件 / file: {self.file}")
             if 'process' in locals() and process.returncode is None:
                 process.terminate()
             return
         except Exception as e:
-            logger.error(f"转录发送异常: {e}", exc_info=True)
+            logger.error(f"转录发送异常 / Transcription submission failed: {e}", exc_info=True)
             if 'process' in locals() and process.returncode is None:
                 process.terminate()
             return
@@ -202,15 +202,15 @@ class FileTranscriber:
                 if not msg:
                     break
                 
-                console.print(f'    转录进度: {msg.duration:.2f}s', end='\r')
+                console.print(f'    转录进度 / Transcription progress: {msg.duration:.2f}s', end='\r')
                 if msg.is_final:
                     message = msg # 保持变量名兼容后续调用
                     break
         except ConnectionError as e:
-            logger.error(f"{e}, 文件: {self.file}")
+            logger.error(f"{e}, 文件 / file: {self.file}")
             return
         except Exception as e:
-            logger.error(f"接收消息错误: {e}")
+            logger.error(f"接收消息错误 / Could not receive a transcription message: {e}")
             return
 
         # 应用热词并同步 tokens
@@ -225,8 +225,8 @@ class FileTranscriber:
         )
         
         process_duration = message.time_complete - message.time_start
-        console.print(f'\033[K    处理耗时：{process_duration:.2f}s')
-        console.print(f'    识别结果：\n[green]{text_display}')
+        console.print(f'\033[K    处理耗时 / Processing time: {process_duration:.2f}s')
+        console.print(f'    识别结果 / Transcript:\n[green]{text_display}')
         
         logger.info(
             f"转录完成: {self.file}, 处理耗时: {process_duration:.2f}s, "
@@ -247,10 +247,10 @@ class FileTranscriber:
         corrected = correction.text
         # 记录热词匹配日志
         for origin, hw, score in correction.matchs:
-            logger.info(f"热词匹配: 「{origin}」→「{hw}」(分数={score:.2f})")
-            console.print(f'    [cyan]热词匹配:[/] 「{origin}」→「[green]{hw}[/]」(分数={score:.2f})')
+            logger.info(f"热词匹配 / Hotword match: 「{origin}」→「{hw}」(分数 / score={score:.2f})")
+            console.print(f'    [cyan]热词匹配 / Hotword match:[/] 「{origin}」→「[green]{hw}[/]」(分数 / score={score:.2f})')
         for origin, hw, score in correction.similars:
-            logger.debug(f"热词参考: 「{origin}」≈「{hw}」(分数={score:.2f})")
+            logger.debug(f"热词参考: 「{origin}」≈「{hw}」(分数 / score={score:.2f})")
 
         # 2. 规则替换
         if Config.hot_rule:

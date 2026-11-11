@@ -44,7 +44,7 @@ class FileTaskServer:
                 reader, writer = await asyncio.open_unix_connection(str(self.path))
                 writer.close()
                 await writer.wait_closed()
-                raise RuntimeError("已有 CapsWriter 客户端正在提供文件转录服务")
+                raise RuntimeError("已有客户端提供文件转录服务 / A running client is already serving transcription requests")
             except (ConnectionRefusedError, FileNotFoundError, OSError):
                 self.path.unlink(missing_ok=True)
 
@@ -52,7 +52,7 @@ class FileTaskServer:
             self._handle_client, path=str(self.path)
         )
         os.chmod(self.path, 0o600)
-        logger.info("文件转录复用服务已启动: %s", self.path)
+        logger.info("文件转录复用服务已启动 / File transcription service started: %s", self.path)
 
     def stop(self) -> None:
         if self._server is not None:
@@ -68,16 +68,16 @@ class FileTaskServer:
             request = json.loads(raw.decode("utf-8"))
             requested = request.get("files", [])
             if not isinstance(requested, list):
-                raise ValueError("files 必须是路径列表")
+                raise ValueError("files 必须是路径列表 / files must be a list of paths")
             output_mode = request.get("output")
             if output_mode not in {"txt", "srt", "both"}:
-                raise ValueError("output 必须是 txt、srt 或 both")
+                raise ValueError("output 必须是 txt、srt 或 both / output must be txt, srt, or both")
 
             files = [Path(item).expanduser().resolve() for item in requested]
             async with self._file_lock:
                 result = await self._process_files(files, output_mode)
         except Exception as exc:
-            logger.error("接收文件转录任务失败: %s", exc, exc_info=True)
+            logger.error("接收文件转录任务失败 / Could not accept transcription request: %s", exc, exc_info=True)
             result = {"ok": False, "message": str(exc), "files": []}
 
         writer.write((json.dumps(result, ensure_ascii=False) + "\n").encode("utf-8"))
@@ -92,11 +92,11 @@ class FileTaskServer:
 
         valid_files = [path for path in files if path.is_file()]
         if not valid_files:
-            return {"ok": False, "message": "没有可处理的文件", "files": []}
+            return {"ok": False, "message": "没有可处理的文件 / No files to process", "files": []}
 
         console.print(
-            f"\n[bold cyan]收到复用模型的文件转录任务：{len(valid_files)} 个文件，"
-            f"输出 {output_mode.upper()}[/bold cyan]"
+            f"\n[bold cyan]收到复用模型的转录任务 / Reusing the loaded model: {len(valid_files)} 个文件 / files, "
+            f"输出格式 / format {output_mode.upper()}[/bold cyan]"
         )
         save_txt = output_mode in {"txt", "both"}
         save_srt = output_mode in {"srt", "both"}
@@ -136,11 +136,11 @@ class FileTaskServer:
                 else:
                     failed.append(str(path))
             except Exception as exc:
-                logger.error("复用模型转录失败: %s: %s", path, exc, exc_info=True)
+                logger.error("复用模型转录失败 / Transcription with the loaded model failed: %s: %s", path, exc, exc_info=True)
                 failed.append(str(path))
 
         ok = not failed
-        message = "全部转录完成" if ok else f"完成 {len(completed)} 个，失败 {len(failed)} 个"
+        message = "全部转录完成 / All files transcribed" if ok else f"结果 / Results: {len(completed)} 完成 / complete, {len(failed)} 失败 / failed"
         return {
             "ok": ok,
             "message": message,
@@ -169,16 +169,16 @@ async def submit_files(files: list[str], output_mode: str) -> int:
     await writer.wait_closed()
 
     if not response_raw:
-        print("已运行的 CapsWriter 客户端没有返回处理结果", file=sys.stderr)
+        print("运行中的客户端没有返回结果 / The running client returned no result", file=sys.stderr)
         return 1
 
     response = json.loads(response_raw.decode("utf-8"))
-    print(response.get("message", "文件任务已结束"))
+    print(response.get("message", "文件任务已结束 / File task finished"))
     return 0 if response.get("ok") else 1
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="向已运行的 CapsWriter 提交文件转录任务")
+    parser = argparse.ArgumentParser(description="向运行中的 CmdWriter 提交转录任务 / Submit a transcription request to the running CmdWriter client")
     parser.add_argument("command", choices=["submit"])
     parser.add_argument(
         "--output",

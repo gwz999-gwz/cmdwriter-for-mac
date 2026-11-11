@@ -18,21 +18,23 @@ class MediaTool:
         ffprobe_path = shutil.which('ffprobe')
         
         if ffmpeg_path is None:
-            console.print('\n[bold red]错误：未检测到 FFmpeg 环境[/bold red]')
-            console.print('    文件转录功能依赖 FFmpeg 来提取音视频中的音频。')
-            console.print('    [cyan]建议处理方案：[/cyan]')
-            console.print('    1. 请确保已安装 FFmpeg 并将其 [bold]bin[/bold] 目录添加到系统环境变量 [bold]Path[/bold] 中。')
-            console.print('    2. 或者将 [bold]ffmpeg.exe[/bold] 放置在程序根目录下。')
-            console.print('    3. 也可以前往官方下载：[u]https://ffmpeg.org/download.html[/u]\n')
-            logger.error("未检测到 FFmpeg 环境，无法进行文件转录")
+            console.print(
+                '[bold red]未找到 FFmpeg / FFmpeg not found[/bold red]\n'
+                '请安装 FFmpeg 并确认终端可以找到它。\n'
+                'Install FFmpeg and make sure it is on your PATH.\n'
+                '[cyan]brew install ffmpeg[/cyan]'
+            )
+            logger.error("无法转录文件，缺少 FFmpeg / File transcription requires FFmpeg")
             return False
-            
+
         if ffprobe_path is None:
-            console.print('\n[bold yellow]提示：未检测到 ffprobe 环境[/bold yellow]')
-            console.print('    程序将无法预先获取文件时长，进度条将只显示当前已发送时长。')
-            console.print('    [cyan]建议：[/cyan]若需完整进度条，请在安装 FFmpeg 时确保 bin 目录下包含 ffprobe.exe。\n')
-            logger.warning("未检测到 ffprobe 环境，进度显示将受到限制")
-            
+            console.print(
+                '[bold yellow]未找到 ffprobe / ffprobe not found[/bold yellow]\n'
+                '转录进度将只显示已处理时长。\n'
+                'Progress will show the processed duration only.'
+            )
+            logger.warning("未找到 ffprobe / ffprobe not found")
+
         return True
 
     @staticmethod
@@ -52,7 +54,7 @@ class MediaTool:
             if process.returncode == 0:
                 return float(stdout.decode().strip())
         except Exception as e:
-            logger.warning(f"无法通过 ffprobe 获取时长: {e}")
+            logger.warning(f"无法通过 ffprobe 获取时长 / ffprobe could not determine the duration: {e}")
         return 0.0
 
     @staticmethod

@@ -93,7 +93,7 @@ def check_ffmpeg():
 def load_audio_ffmpeg(audio_path, sample_rate=24000, start_second=None, duration=None):
     """使用 ffmpeg 直接读取音频"""
     if not check_ffmpeg():
-        raise RuntimeError("系统未发现 ffmpeg。请先安装 ffmpeg 并将其添加到系统环境变量 PATH 中。")
+        raise RuntimeError("未找到 ffmpeg，请安装并加入 PATH。 / Install ffmpeg and make sure it is on your PATH.")
 
     cmd = ['ffmpeg', '-y', '-i', str(audio_path)]
 
@@ -120,7 +120,7 @@ def load_audio_ffmpeg(audio_path, sample_rate=24000, start_second=None, duration
 
     if process.returncode != 0:
         error_msg = stderr.decode('utf-8', errors='ignore')
-        raise RuntimeError(f"ffmpeg 处理音频失败: {error_msg}")
+        raise RuntimeError(f"ffmpeg 处理音频失败 / ffmpeg could not process the audio: {error_msg}")
 
     return np.frombuffer(raw_bytes, dtype=np.float32)
 
@@ -134,7 +134,7 @@ def load_audio(audio_path, sample_rate=16000, start_second=None, duration=None):
     - 其他 ffmpeg fallback: .m4a, .mp4, .opus, .wmv 等
     """
     if not os.path.exists(audio_path):
-        raise FileNotFoundError(f"音频文件不存在: {audio_path}")
+        raise FileNotFoundError(f"音频文件不存在 / Audio file not found: {audio_path}")
         
     # 获取后缀名
     ext = Path(audio_path).suffix.lower()

@@ -167,7 +167,7 @@ class QwenAudioEncoder:
             backend_providers = ['CPUExecutionProvider']
             
         if self.verbose: 
-            print(f"--- [Encoder] 加载 Split ONNX 模型 (Provider: {providers[0]}, Pad: {dml_pad_to}s) ---")
+            print(f"--- [Encoder] 加载 Split ONNX 模型 / Loading split ONNX model (Provider: {providers[0]}, Pad: {dml_pad_to}s) ---")
             print(f"    Frontend: {os.path.basename(frontend_path)}")
             print(f"    Backend:  {os.path.basename(backend_path)}")
 
@@ -191,15 +191,15 @@ class QwenAudioEncoder:
 
         # 预热处理
         if self.dml_pad_to > 0 and self.active_dml:
-            if self.verbose: print(f"--- [Encoder] 正在预热 (固定形状: {self.dml_pad_to}s)... ---")
+            if self.verbose: print(f"--- [Encoder] 正在预热 / Warming up (fixed input duration: {self.dml_pad_to}s)... ---")
             dummy_wav = np.zeros(int(16000 * self.dml_pad_to)).astype(np.float32)
             _ = self.encode(dummy_wav)
         else:
             # 非 DML 模式下，预热一个短音频即可，无需 Padding
-            if self.verbose: print(f"--- [Encoder] 正在预热 (非 DML 模式)... ---")
+            if self.verbose: print(f"--- [Encoder] 正在预热 / Warming up (non-DML mode)... ---")
             dummy_wav = np.zeros(int(16000 * 2.0)).astype(np.float32)
             _ = self.encode(dummy_wav)
-        if self.verbose: print("--- [Encoder] 预热完成 ---")
+        if self.verbose: print("--- [Encoder] 预热完成 / Warm-up complete ---")
 
     def _run_frontend(self, mel: np.ndarray) -> np.ndarray:
         """前端推理流水线：Pad -> Chunk Loop -> Concat -> Slice"""

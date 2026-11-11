@@ -101,13 +101,13 @@ class CapsWriterClient:
         try:
             self.state.reset()
         except Exception as e:
-            logger.warning(f"重置状态时发生错误: {e}")
+            logger.warning(f"重置状态失败 / Could not reset application state: {e}")
 
         # 6. 停止事件循环（最后一步，确保前面的异步操作已调度）
         self.loop.stop()
 
         logger.info("资源释放完成")
-        console.print('[green4]再见！')
+        console.print('[green4]再见！ / Goodbye!')
 
 
     def start(self, file_output_mode: Optional[str] = None):
@@ -135,14 +135,14 @@ class CapsWriterClient:
         # 等待模型加载完成，避免 llama.py 导入时切换全局工作目录造成的竞态
         # （否则 hot.txt / 输入文件等相对路径可能解析失败）
         if not self.engine.is_ready:
-            console.print('[yellow]正在加载语音识别模型（Qwen3-ASR），请稍候…[/yellow]')
+            console.print('[yellow]正在加载语音识别模型（Qwen3-ASR）… / Loading the Qwen3-ASR model…[/yellow]')
         while not self.engine.is_ready:
             if self.engine.is_failed:
-                console.print(f'[bold red]语音识别模型加载失败: {self.engine.load_error}[/bold red]')
-                console.print('[bold red]程序退出。[/bold red]')
+                console.print(f'[bold red]语音识别模型加载失败 / Could not load speech recognition model: {self.engine.load_error}[/bold red]')
+                console.print('[bold red]程序退出。 / Exiting.[/bold red]')
                 return
             time.sleep(0.1)
-        console.print('[green]语音识别模型加载完成[/green]\n')
+        console.print('[green]语音识别模型加载完成 / Speech recognition model loaded[/green]\n')
 
         self._start_macos(runner)
 

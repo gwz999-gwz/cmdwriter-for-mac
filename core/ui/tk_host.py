@@ -62,7 +62,7 @@ def start() -> None:
     """在主线程创建隐藏 Tk 根窗口并启动队列轮询。幂等。"""
     global _active
     if not is_main_thread():
-        raise RuntimeError("tk_host.start() 必须在主线程调用")
+        raise RuntimeError("请从主线程调用 tk_host.start() / Call tk_host.start() from the main thread")
     root = ensure_root()
     if not _active:
         _active = True
@@ -100,4 +100,4 @@ def _invoke(fn, args, kwargs) -> None:
     try:
         fn(*args, **kwargs)
     except Exception:
-        _logger.exception("Tk 主线程任务执行失败: %r", fn)
+        _logger.exception("Tk 主线程任务执行失败 / Tk main-thread task failed: %r", fn)

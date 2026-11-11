@@ -24,11 +24,11 @@ BIN_DIR="$BASE_DIR/core/engine/engines/llama/bin"
 PYTHON="${PYTHON:-$BASE_DIR/.venv/bin/python}"
 VERSION="${1:-b7798}"
 
-echo "==> [1/5] 安装 Python 依赖 gguf"
+echo "==> [1/5] 安装 Python 依赖 gguf / Installing the gguf Python package"
 uv pip install gguf --python "$PYTHON"
 
 # 2. 定位发布包
-echo "==> [2/5] 定位 llama.cpp $VERSION 的 macOS arm64 发布包"
+echo "==> [2/5] 定位 llama.cpp $VERSION 的 macOS arm64 发布包 / Locating the macOS arm64 release of llama.cpp $VERSION"
 URL=""
 if command -v python3 >/dev/null; then
   URL="$(curl -s "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/$VERSION" \
@@ -45,10 +45,10 @@ except Exception:
 ')"
 fi
 if [ -z "$URL" ]; then
-  echo "    GitHub API 未找到资产，尝试常见文件名..."
+  echo "    GitHub API 未找到资产，尝试常见文件名... / GitHub API found no asset. Trying common filenames..."
   for ext in zip tar tar.gz tgz; do
     cand="https://github.com/ggml-org/llama.cpp/releases/download/$VERSION/llama-${VERSION}-bin-macos-arm64.$ext"
-    echo "    尝试: $cand"
+    echo "    尝试 / Trying:  $cand"
     if curl -sfL -o /dev/null "$cand"; then
       URL="$cand"
       break
@@ -56,16 +56,16 @@ if [ -z "$URL" ]; then
   done
 fi
 if [ -z "$URL" ]; then
-  echo "错误：无法自动定位 $VERSION 的 macOS arm64 发布包。"
-  echo "请手动打开下面的发布页，下载 macOS (Apple Silicon) 资产，解压后把其中所有"
-  echo "  .dylib 复制到 $BIN_DIR 再运行本脚本做签名/自检："
+  echo "错误：无法自动定位 $VERSION 的 macOS arm64 发布包。 / Error: could not find the macOS arm64 release for $VERSION."
+  echo "请手动打开下面的发布页，下载 macOS (Apple Silicon) 资产，解压后把其中所有 / Open the release page below, download the macOS (Apple Silicon) asset, and extract it."
+  echo "  .dylib 复制到 $BIN_DIR 再运行本脚本做签名/自检： / Copy all .dylib files to $BIN_DIR, then rerun this script to sign and verify them."
   echo "    https://github.com/ggml-org/llama.cpp/releases/tag/$VERSION"
   exit 1
 fi
-echo "    下载地址: $URL"
+echo "    下载地址 / Download URL:  $URL"
 
 # 3. 下载并解压
-echo "==> [3/5] 下载并解压发布包"
+echo "==> [3/5] 下载并解压发布包 / Downloading and extracting the release"
 TMPBIN="/tmp/llama-${VERSION}-macos-arm64.bin"
 curl -L -o "$TMPBIN" "$URL"
 EXTRACT_DIR="$(mktemp -d)"
@@ -75,12 +75,12 @@ case "$URL" in
 esac
 
 # 4. 去隔离 + 签名
-echo "==> [4/5] 去除隔离属性并 ad-hoc 签名 dylib"
+echo "==> [4/5] 去除隔离属性并 ad-hoc 签名 dylib / Clearing quarantine attributes and ad-hoc signing the dynamic libraries"
 find "$EXTRACT_DIR" -name "*.dylib" -exec xattr -dr com.apple.quarantine {} \; 2>/dev/null || true
 find "$EXTRACT_DIR" -name "*.dylib" -exec codesign --force --sign - {} \; 2>/dev/null || true
 
 # 5. 复制 + ABI 自检
-echo "==> [5/5] 复制 .dylib 到 $BIN_DIR"
+echo "==> [5/5] 复制 .dylib 到 $BIN_DIR / Copying .dylib files to $BIN_DIR"
 mkdir -p "$BIN_DIR"
 COUNT=0
 while IFS= read -r -d '' f; do
@@ -89,13 +89,13 @@ while IFS= read -r -d '' f; do
 done < <(find "$EXTRACT_DIR" -name "*.dylib" -print0)
 rm -rf "$EXTRACT_DIR" "$TMPBIN"
 if [ "$COUNT" -eq 0 ]; then
-  echo "警告：发布包中未找到 .dylib"
+  echo "警告：发布包中未找到 .dylib / Warning: no .dylib files found in the release"
   exit 1
 fi
-echo "    已复制 $COUNT 个 .dylib"
+echo "    已复制 $COUNT 个 .dylib / Copied $COUNT .dylib files"
 
 # ABI 自检
-echo "==> ABI 自检"
+echo "==> ABI 自检 / ABI check"
 if "$PYTHON" -c "
 import ctypes, os
 lib_dir = r'$BIN_DIR'
@@ -122,15 +122,15 @@ class llama_model_params(ctypes.Structure):
 libllama = ctypes.CDLL(os.path.join(lib_dir, 'libllama.dylib'))
 libllama.llama_model_default_params.restype = llama_model_params
 mp = libllama.llama_model_default_params()
-assert mp.use_mmap is True, 'ABI 不匹配: use_mmap=%r' % mp.use_mmap
-print('ABI 自检通过 (use_mmap=True)，库版本与 llama.py 兼容')
+assert mp.use_mmap is True, 'ABI 不匹配 / ABI mismatch: use_mmap=%r' % mp.use_mmap
+print('ABI 自检通过 (use_mmap=True)，库版本与 llama.py 兼容 / ABI check passed (use_mmap=True). The library is compatible with llama.py.')
 " 2>/dev/null; then
   echo ""
-  echo "完成！本地 Qwen3-ASR 运行库已准备好。"
-  echo "    双击 启动客户端.command 即可启动。"
+  echo "完成！本地 Qwen3-ASR 运行库已准备好。 / Setup complete. The local Qwen3-ASR runtime is ready."
+  echo "    双击 start-client.command 即可启动。 / Double-click start-client.command to start."
 else
   echo ""
-  echo "⚠️  ABI 自检未通过：下载的库版本与 llama.py 不兼容（可能仍是最新版而非 $VERSION）。"
-  echo "    请确认从 b7798 发布页下载的是 macOS Apple Silicon 资产。"
+  echo "⚠️  ABI 自检未通过：下载的库版本与 llama.py 不兼容（可能仍是最新版而非 $VERSION）。 / ABI check failed: the downloaded library is incompatible with llama.py. Check that it is version $VERSION."
+  echo "    请确认从 b7798 发布页下载的是 macOS Apple Silicon 资产。 / Use the macOS Apple Silicon asset from the b7798 release."
   exit 1
 fi
